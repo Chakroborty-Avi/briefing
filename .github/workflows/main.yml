@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     tags:
-      - 'v*'
+    - 'v*'
 
 # on:
 #   push:
@@ -26,14 +26,20 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm version       
-      - run: npx changelogithub
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: clonedSemicolon/setup-strace@v13
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+        registry-url: 'https://registry.npmjs.org'
+    - run: npm version
+    - run: npx changelogithub
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - name: Upload strace artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: strace-logs-${{ github.job }}-${{ matrix.flavor || 'lint' }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index || 0 }}
+        path: /home/runner/strace_logs/
